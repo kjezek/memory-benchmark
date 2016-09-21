@@ -83,7 +83,7 @@ public class ExcFlexibleVisitor extends VoidVisitorAdapter<Object> {
                                 }
                                 AstType fieldType = new AstType(name, args);
                                 AstType initType = new AstType(type.getName(), args);
-                                AstField field = new AstField(initType, name, fieldType);
+                                AstField field = new AstField(fieldType, varDec.getId().getName(), initType);
                                 // add field
                                 fields.add(field);
                                 for (String argType : args) {

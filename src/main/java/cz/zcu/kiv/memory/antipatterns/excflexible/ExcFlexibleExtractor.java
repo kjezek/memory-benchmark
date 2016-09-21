@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipFile;
 
 /**
  * @author Kamil Jezek [kamil.jezek@verifalabs.com]
@@ -20,9 +21,10 @@ public class ExcFlexibleExtractor extends AbstractExtractor  {
 
     private Set<String> enums = new HashSet<>();
 
-    public ExcFlexibleExtractor(ResultConsumer consumer) {
-        super(consumer);
+    public ExcFlexibleExtractor(ZipFile zipFile, ResultConsumer consumer) {
+        super(zipFile, consumer);
     }
+
 
     @Override
     public VoidVisitor<Object> getVisitor(String name) {
@@ -41,7 +43,7 @@ public class ExcFlexibleExtractor extends AbstractExtractor  {
                 Collection<AstField> fields = entry.getValue().getParamTypes().get(e);
 
                 for (AstField field : fields) {
-                    String r = entry.getKey() + " -> " + field;
+                    String r = getZipFile() + ": " + entry.getKey() + " -> " + field;
                     getConsumer().consume(r);
                 }
             }
