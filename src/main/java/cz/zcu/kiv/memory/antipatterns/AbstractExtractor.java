@@ -16,6 +16,12 @@ import java.util.zip.ZipFile;
  */
 public abstract class AbstractExtractor implements Extractor {
 
+    private ResultConsumer consumer;
+
+    public AbstractExtractor(ResultConsumer consumer) {
+        this.consumer = consumer;
+    }
+
     @Override
     public final void analyse(ZipFile zip, String programName, String version) throws IOException, ParseException {
 
@@ -39,5 +45,7 @@ public abstract class AbstractExtractor implements Extractor {
 
     public abstract void end();
 
-
+    public ResultConsumer getConsumer() {
+        return consumer;
+    }
 }

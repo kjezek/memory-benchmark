@@ -2,8 +2,7 @@ package cz.zcu.kiv.memory.antipatterns.excflexible;
 
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import cz.zcu.kiv.memory.antipatterns.AbstractExtractor;
-import cz.zcu.kiv.memory.antipatterns.Extractor;
-import cz.zcu.kiv.memory.antipatterns.ExtractorFactory;
+import cz.zcu.kiv.memory.antipatterns.ResultConsumer;
 import cz.zcu.kiv.memory.antipatterns.domain.AstField;
 
 import java.util.Collection;
@@ -15,11 +14,15 @@ import java.util.Set;
 /**
  * @author Kamil Jezek [kamil.jezek@verifalabs.com]
  */
-public class ExcFlexibleExtractor extends AbstractExtractor implements ExtractorFactory {
+public class ExcFlexibleExtractor extends AbstractExtractor  {
 
     private Map<String, ExcFlexibleVisitor> data = new HashMap<>();
 
     private Set<String> enums = new HashSet<>();
+
+    public ExcFlexibleExtractor(ResultConsumer consumer) {
+        super(consumer);
+    }
 
     @Override
     public VoidVisitor<Object> getVisitor(String name) {
@@ -38,17 +41,11 @@ public class ExcFlexibleExtractor extends AbstractExtractor implements Extractor
                 Collection<AstField> fields = entry.getValue().getParamTypes().get(e);
 
                 for (AstField field : fields) {
-                    System.out.println(entry.getKey() + " -> " + field);
-                    System.exit(-1);
+                    String r = entry.getKey() + " -> " + field;
+                    getConsumer().consume(r);
                 }
             }
         }
-        // process data here
-        System.out.println();
     }
 
-    @Override
-    public Extractor create() {
-        return new ExcFlexibleExtractor();
-    }
 }

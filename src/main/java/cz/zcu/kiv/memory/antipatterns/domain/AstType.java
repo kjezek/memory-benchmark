@@ -51,7 +51,7 @@ public class AstType {
             for (String p : paramTypes) {
                 params += p + ",";
             }
-            params += ">";
+            params = params.substring(0, params.length() -1) + ">";
         }
         return name + params;
     }
