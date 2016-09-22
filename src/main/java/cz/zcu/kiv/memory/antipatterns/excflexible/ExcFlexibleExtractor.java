@@ -21,8 +21,8 @@ public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor
 
     private Set<String> enums = new HashSet<>();
 
-    public ExcFlexibleExtractor(ResultConsumer<ExcFlexibleAntipattern> consumer, ZipFile zipFile) {
-        super(consumer, zipFile);
+    public ExcFlexibleExtractor(ResultConsumer<ExcFlexibleAntipattern> consumer, ZipFile zipFile, ZipFile[] deps) {
+        super(consumer, zipFile, deps);
     }
 
 
@@ -33,6 +33,11 @@ public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor
         data.put(name, visitor);
 
         return visitor;
+    }
+
+    @Override
+    public VoidVisitor<Object> getVisitorDeps(String name) {
+        return new ExcFlexibleVisitor(enums);
     }
 
     @Override

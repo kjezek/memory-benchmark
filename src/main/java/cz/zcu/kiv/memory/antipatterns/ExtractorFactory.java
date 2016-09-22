@@ -11,5 +11,5 @@ public interface ExtractorFactory<T> {
 
     ExtractorFactory<ExcFlexibleExtractor.ExcFlexibleAntipattern> EXC_FLEXIBLE = ExcFlexibleExtractor::new;
 
-    Extractor create(ResultConsumer<T> consumer, ZipFile zipFile);
+    Extractor create(ResultConsumer<T> consumer, ZipFile zipFile, ZipFile[] deps);
 }
