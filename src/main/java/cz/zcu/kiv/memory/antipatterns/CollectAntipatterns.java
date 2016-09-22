@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 /**
@@ -25,15 +27,16 @@ import java.util.zip.ZipFile;
 public class CollectAntipatterns {
 
     private static Logger LOGGER = LoggerFactory.getLogger(CollectAntipatterns.class);
+    private static File DATA_FOLDER = new File(Preferences.getDataFolder());
 
-    private static ExtractorFactory[] EXTRACTORS = {
-            ExtractorFactory.EXC_FLEXIBLE
+    private static Extractor[] EXTRACTORS = {
+            Extractor.EXC_FLEXIBLE
     };
+    public static final File MVN_DEPENDENCIES = new File("mvn-dependencies");
 
     public static void main(String[] args) throws Exception {
 
-        File DATA_FOLDER = new File(Preferences.getDataFolder());
-        File OUTPUT_FOLDER = new File(Preferences.getOutputContractsFolder());
+        File OUTPUT_FOLDER = new File(Preferences.getResultsFolder());
         int THREAD_COUNT = Preferences.getThreadCount();
 
         Collection<File> zips = FileUtils.listFiles(DATA_FOLDER, new String[]{"zip"}, true);
@@ -47,13 +50,10 @@ public class CollectAntipatterns {
 
         long startTime = System.currentTimeMillis();
 
-        Set<ExcFlexibleExtractor.ExcFlexibleAntipattern> antipatterns = Collections.synchronizedSet(new HashSet<>());
-        ResultConsumer<ExcFlexibleExtractor.ExcFlexibleAntipattern> consumer = antipatterns::add;
-
         // do not forget to add this folder!
         File jdkDir = new File(Preferences.getDataFolder(), "open-jdk");
         File jdk = new File(jdkDir, "open-jdk-8.zip");
-        File[] desp = new File[] {jdk};
+        File[] globalDeps = new File[] {jdk};
 
 
         for (File zip : zips) {
@@ -64,8 +64,22 @@ public class CollectAntipatterns {
 
             Runnable task = () -> {
                 try {
-                    find(new ZipFile(zip), desp, programName, version, consumer);
+                    Set<Antipattern> antipatterns = new HashSet<>();
+                    ResultConsumer<ExcFlexibleExtractor.ExcFlexibleAntipattern> consumer = antipatterns::add;
+
+                    find(zip, globalDeps, programName, version, consumer);
                     LOGGER.info("Processed " + progressCounter.incrementAndGet() + "/" + total + ": " + zip.getAbsolutePath() + " -- ");
+
+                    if (!antipatterns.isEmpty()) {
+                        final File programFile = new File(OUTPUT_FOLDER, programName);
+                        FileUtils.forceMkdir(programFile);
+                        final File resultFile = new File(programFile, programName + "-" + version + ".txt");
+                        try (PrintStream stream = new PrintStream(resultFile)) {
+                            for (Antipattern a : antipatterns) {
+                                stream.println(a.toTxt());
+                            }
+                        }
+                    }
                 } catch (Exception e) {
                     // log errors and continue with next files
                     LOGGER.warn("Cannot parse file: " + zip, e);
@@ -85,30 +99,33 @@ public class CollectAntipatterns {
 
         LOGGER.info("Antipatterns");
 
-        List<ExcFlexibleExtractor.ExcFlexibleAntipattern> antipatternList = new ArrayList<>(antipatterns);
-        Collections.sort(antipatternList, new Comparator<ExcFlexibleExtractor.ExcFlexibleAntipattern>() {
-            @Override
-            public int compare(ExcFlexibleExtractor.ExcFlexibleAntipattern o1, ExcFlexibleExtractor.ExcFlexibleAntipattern o2) {
-                return o1.getFile().getName().compareTo(o2.getFile().getName());
-            }
-        });
-        for (ExcFlexibleExtractor.ExcFlexibleAntipattern antipattern : antipatternList) {
-            LOGGER.info("\t" + antipattern);
-        }
     }
 
     @SuppressWarnings("unchecked")
-    private static void find(ZipFile zip, File[] desp, String programName, String version, ResultConsumer consumer) throws Exception {
+    private static void find(File zip, File[] globalDeps, String programName, String version, ResultConsumer consumer) throws Exception {
 
+        // add global dependencies
         Set<ZipFile> depsZips = new HashSet<>();
-        for (File file : desp) {
+        for (File file : globalDeps) {
             depsZips.add(new ZipFile(file));
         }
 
+        // add project dependencies
+//        final File programFile = new File(DATA_FOLDER, programName);
+//        File json = new File(programFile, programName + "-" + version + "-deps.json");
+//        List<ProgramVersion> deps = Utils.parseDepsProgramVersion(MVN_DEPENDENCIES, json);
+//        for (ProgramVersion dep : deps) {
+//            try {
+//                depsZips.add(new ZipFile(dep.getFile()));
+//            } catch (ZipException e) {
+//                LOGGER.trace("Cannot parse {}", dep.getFile());
+//            }
+//        }
+
         ZipFile[] depsArray = depsZips.toArray(new ZipFile[0]);
 
-        for (ExtractorFactory extractor : EXTRACTORS) {
-            extractor.create(consumer, zip, depsArray).analyse();
+        for (Extractor extractor : EXTRACTORS) {
+            extractor.analyse(consumer, new ZipFile(zip), depsArray);
         }
 
     }

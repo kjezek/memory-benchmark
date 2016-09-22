@@ -2,6 +2,7 @@ package cz.zcu.kiv.memory.antipatterns.excflexible;
 
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import cz.zcu.kiv.memory.antipatterns.AbstractExtractor;
+import cz.zcu.kiv.memory.antipatterns.Antipattern;
 import cz.zcu.kiv.memory.antipatterns.ResultConsumer;
 import cz.zcu.kiv.memory.antipatterns.domain.AstField;
 
@@ -55,7 +56,7 @@ public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor
         }
     }
 
-    public static class ExcFlexibleAntipattern {
+    public static class ExcFlexibleAntipattern implements Antipattern {
 
         private ZipFile file;
         private String cu;
@@ -85,5 +86,9 @@ public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor
         }
 
 
+        @Override
+        public String toTxt() {
+            return cu + " -> " + astField;
+        }
     }
 }
