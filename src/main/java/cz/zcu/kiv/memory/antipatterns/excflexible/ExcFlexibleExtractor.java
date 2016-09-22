@@ -10,11 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipFile;
 
 /**
  * @author Kamil Jezek [kamil.jezek@verifalabs.com]
  */
-public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor.ExcFlexibleAntipattern>  {
+public class ExcFlexibleExtractor extends AbstractExtractor  {
 
     private Map<String, ExcFlexibleVisitor> data = new HashMap<>();
 
@@ -22,7 +23,10 @@ public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor
 
     public ExcFlexibleExtractor(ResultConsumer<ExcFlexibleExtractor.ExcFlexibleAntipattern> consumer) {
         super(consumer);
+    public ExcFlexibleExtractor(ZipFile zipFile, ResultConsumer consumer) {
+        super(zipFile, consumer);
     }
+
 
     @Override
     public VoidVisitor<Object> getVisitor(String name) {
@@ -41,6 +45,7 @@ public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor
                 Collection<AstField> fields = entry.getValue().getParamTypes().get(e);
 
                 for (AstField field : fields) {
+                    String r = getZipFile() + ": " + entry.getKey() + " -> " + field;
                     ExcFlexibleAntipattern r = new ExcFlexibleAntipattern(entry.getKey(), field);
                     getConsumer().consume(r);
                 }

@@ -95,7 +95,7 @@ public class CollectAntipatterns {
     private static void find(ZipFile zip, String programName, String version, ResultConsumer consumer) throws Exception {
 
         for (ExtractorFactory extractor : EXTRACTORS) {
-            extractor.create(consumer).analyse(zip, programName, version);
+            extractor.create(zip, consumer).analyse();
         }
 
     }
