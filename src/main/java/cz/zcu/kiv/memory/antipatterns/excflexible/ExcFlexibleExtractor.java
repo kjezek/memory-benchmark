@@ -76,7 +76,7 @@ public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor
 
         @Override
         public String toString() {
-            return file + ": " + cu + " -> " + astField;
+            return file.getName() + ": " + cu + " -> " + astField;
         }
 
 

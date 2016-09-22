@@ -86,7 +86,7 @@ public class CollectAntipatterns {
                 return o1.getFile().getName().compareTo(o2.getFile().getName());
             }
         });
-        for (ExcFlexibleExtractor.ExcFlexibleAntipattern antipattern : antipatterns) {
+        for (ExcFlexibleExtractor.ExcFlexibleAntipattern antipattern : antipatternList) {
             LOGGER.info("\t" + antipattern);
         }
     }
