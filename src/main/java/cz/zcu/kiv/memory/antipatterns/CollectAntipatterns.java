@@ -50,6 +50,12 @@ public class CollectAntipatterns {
         Set<ExcFlexibleExtractor.ExcFlexibleAntipattern> antipatterns = Collections.synchronizedSet(new HashSet<>());
         ResultConsumer<ExcFlexibleExtractor.ExcFlexibleAntipattern> consumer = antipatterns::add;
 
+        // do not forget to add this folder!
+        File jdkDir = new File(Preferences.getDataFolder(), "open-jdk");
+        File jdk = new File(jdkDir, "open-jdk-8.zip");
+        File[] desp = new File[] {jdk};
+
+
         for (File zip : zips) {
             parsedProgramVersionCounter.incrementAndGet();
             ProgramVersion v = ProgramVersion.getOrCreateFromFile(zip);
@@ -58,7 +64,7 @@ public class CollectAntipatterns {
 
             Runnable task = () -> {
                 try {
-                    find(new ZipFile(zip), programName, version, consumer);
+                    find(new ZipFile(zip), desp, programName, version, consumer);
                     LOGGER.info("Processed " + progressCounter.incrementAndGet() + "/" + total + ": " + zip.getAbsolutePath() + " -- ");
                 } catch (Exception e) {
                     // log errors and continue with next files
@@ -92,10 +98,17 @@ public class CollectAntipatterns {
     }
 
     @SuppressWarnings("unchecked")
-    private static void find(ZipFile zip, String programName, String version, ResultConsumer consumer) throws Exception {
+    private static void find(ZipFile zip, File[] desp, String programName, String version, ResultConsumer consumer) throws Exception {
+
+        Set<ZipFile> depsZips = new HashSet<>();
+        for (File file : desp) {
+            depsZips.add(new ZipFile(file));
+        }
+
+        ZipFile[] depsArray = depsZips.toArray(new ZipFile[0]);
 
         for (ExtractorFactory extractor : EXTRACTORS) {
-            extractor.create(consumer, zip).analyse();
+            extractor.create(consumer, zip, depsArray).analyse();
         }
 
     }

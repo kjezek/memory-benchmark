@@ -20,9 +20,12 @@ public abstract class AbstractExtractor<T> implements Extractor {
 
     private ZipFile zipFile;
 
-    public AbstractExtractor(ResultConsumer<T> consumer, ZipFile zipFile) {
+    private ZipFile[] deps;
+
+    public AbstractExtractor(ResultConsumer<T> consumer, ZipFile zipFile, ZipFile[] deps) {
         this.consumer = consumer;
         this.zipFile = zipFile;
+        this.deps = deps;
     }
 
     @Override
@@ -41,10 +44,28 @@ public abstract class AbstractExtractor<T> implements Extractor {
             }
         }
 
+        for (ZipFile dep : deps) {
+            Enumeration<? extends ZipEntry> en2 = dep.entries();
+            while (en2.hasMoreElements()) {
+                ZipEntry e = en2.nextElement();
+                String name = e.getName();
+                if (name.endsWith(".java")) {
+                    try (InputStream in = dep.getInputStream(e)) {
+                        CompilationUnit cu = JavaParser.parse(in);
+                        VoidVisitor<Object> visitor = getVisitorDeps(name);
+                        visitor.visit(cu, null);
+                    }
+                }
+            }
+        }
+
         end();
     }
 
     public abstract VoidVisitor<Object> getVisitor(String name);
+
+    public abstract VoidVisitor<Object> getVisitorDeps(String name);
+
 
     public abstract void end();
 
@@ -53,4 +74,5 @@ public abstract class AbstractExtractor<T> implements Extractor {
     }
 
     public ZipFile getZipFile() { return zipFile; }
+
 }
