@@ -20,12 +20,9 @@ public abstract class AbstractExtractor<T> implements Extractor {
 
     private ZipFile zipFile;
 
-    public AbstractExtractor(
-            ZipFile zipFile,
-            ResultConsumer consumer) {
-        this.zipFile = zipFile;
-    public AbstractExtractor(ResultConsumer<T> consumer) {
+    public AbstractExtractor(ResultConsumer<T> consumer, ZipFile zipFile) {
         this.consumer = consumer;
+        this.zipFile = zipFile;
     }
 
     @Override

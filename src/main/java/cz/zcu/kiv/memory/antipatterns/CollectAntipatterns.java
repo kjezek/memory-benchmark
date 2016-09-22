@@ -83,10 +83,10 @@ public class CollectAntipatterns {
         Collections.sort(antipatternList, new Comparator<ExcFlexibleExtractor.ExcFlexibleAntipattern>() {
             @Override
             public int compare(ExcFlexibleExtractor.ExcFlexibleAntipattern o1, ExcFlexibleExtractor.ExcFlexibleAntipattern o2) {
-                return o1.;
+                return o1.getFile().getName().compareTo(o2.getFile().getName());
             }
         });
-        for (String antipattern : antipatterns) {
+        for (ExcFlexibleExtractor.ExcFlexibleAntipattern antipattern : antipatterns) {
             LOGGER.info("\t" + antipattern);
         }
     }
@@ -95,7 +95,7 @@ public class CollectAntipatterns {
     private static void find(ZipFile zip, String programName, String version, ResultConsumer consumer) throws Exception {
 
         for (ExtractorFactory extractor : EXTRACTORS) {
-            extractor.create(zip, consumer).analyse();
+            extractor.create(consumer, zip).analyse();
         }
 
     }

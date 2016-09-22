@@ -9,14 +9,7 @@ import java.util.zip.ZipFile;
  */
 public interface ExtractorFactory<T> {
 
-    ExtractorFactory EXC_FLEXIBLE = new ExtractorFactory() {
-        @Override
-        public Extractor create(ZipFile zipFile, ResultConsumer consumer) {
-            return new ExcFlexibleExtractor(zipFile, consumer);
-        }
-    };
     ExtractorFactory<ExcFlexibleExtractor.ExcFlexibleAntipattern> EXC_FLEXIBLE = ExcFlexibleExtractor::new;
 
-    Extractor create(ZipFile zipFile, ResultConsumer consumer);
-    Extractor create(ResultConsumer<T> consumer);
+    Extractor create(ResultConsumer<T> consumer, ZipFile zipFile);
 }

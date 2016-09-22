@@ -15,16 +15,14 @@ import java.util.zip.ZipFile;
 /**
  * @author Kamil Jezek [kamil.jezek@verifalabs.com]
  */
-public class ExcFlexibleExtractor extends AbstractExtractor  {
+public class ExcFlexibleExtractor extends AbstractExtractor<ExcFlexibleExtractor.ExcFlexibleAntipattern>  {
 
     private Map<String, ExcFlexibleVisitor> data = new HashMap<>();
 
     private Set<String> enums = new HashSet<>();
 
-    public ExcFlexibleExtractor(ResultConsumer<ExcFlexibleExtractor.ExcFlexibleAntipattern> consumer) {
-        super(consumer);
-    public ExcFlexibleExtractor(ZipFile zipFile, ResultConsumer consumer) {
-        super(zipFile, consumer);
+    public ExcFlexibleExtractor(ResultConsumer<ExcFlexibleAntipattern> consumer, ZipFile zipFile) {
+        super(consumer, zipFile);
     }
 
 
@@ -45,8 +43,7 @@ public class ExcFlexibleExtractor extends AbstractExtractor  {
                 Collection<AstField> fields = entry.getValue().getParamTypes().get(e);
 
                 for (AstField field : fields) {
-                    String r = getZipFile() + ": " + entry.getKey() + " -> " + field;
-                    ExcFlexibleAntipattern r = new ExcFlexibleAntipattern(entry.getKey(), field);
+                    ExcFlexibleAntipattern r = new ExcFlexibleAntipattern(getZipFile(), entry.getKey(), field);
                     getConsumer().consume(r);
                 }
             }
@@ -55,10 +52,12 @@ public class ExcFlexibleExtractor extends AbstractExtractor  {
 
     public static class ExcFlexibleAntipattern {
 
+        private ZipFile file;
         private String cu;
         private AstField astField;
 
-        public ExcFlexibleAntipattern(String cu, AstField astField) {
+        public ExcFlexibleAntipattern(ZipFile file, String cu, AstField astField) {
+            this.file = file;
             this.cu = cu;
             this.astField = astField;
         }
@@ -71,9 +70,15 @@ public class ExcFlexibleExtractor extends AbstractExtractor  {
             return astField;
         }
 
+        public ZipFile getFile() {
+            return file;
+        }
+
         @Override
         public String toString() {
-            return cu + " -> " + astField;
+            return file + ": " + cu + " -> " + astField;
         }
+
+
     }
 }
