@@ -5,14 +5,9 @@ import cz.zcu.kiv.memory.antipatterns.excflexible.ExcFlexibleExtractor;
 /**
  * @author Kamil Jezek [kamil.jezek@verifalabs.com]
  */
-public interface ExtractorFactory {
+public interface ExtractorFactory<T> {
 
-    ExtractorFactory EXC_FLEXIBLE = new ExtractorFactory() {
-        @Override
-        public Extractor create(ResultConsumer consumer) {
-            return new ExcFlexibleExtractor(consumer);
-        }
-    };
+    ExtractorFactory<ExcFlexibleExtractor.ExcFlexibleAntipattern> EXC_FLEXIBLE = ExcFlexibleExtractor::new;
 
-    Extractor create(ResultConsumer consumer);
+    Extractor create(ResultConsumer<T> consumer);
 }

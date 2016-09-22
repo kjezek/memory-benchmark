@@ -1,13 +1,17 @@
 package cz.zcu.kiv.memory.antipatterns;
 
+import cz.zcu.kiv.memory.antipatterns.excflexible.ExcFlexibleExtractor;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,8 +47,8 @@ public class CollectAntipatterns {
 
         long startTime = System.currentTimeMillis();
 
-        Set<String> antipatterns = Collections.synchronizedSet(new HashSet<>());
-        ResultConsumer consumer = result -> antipatterns.add(result.toString());
+        Set<ExcFlexibleExtractor.ExcFlexibleAntipattern> antipatterns = Collections.synchronizedSet(new HashSet<>());
+        ResultConsumer<ExcFlexibleExtractor.ExcFlexibleAntipattern> consumer = antipatterns::add;
 
         for (File zip : zips) {
             parsedProgramVersionCounter.incrementAndGet();
@@ -74,6 +78,14 @@ public class CollectAntipatterns {
         LOGGER.info("\tthreads used: " + THREAD_COUNT);
 
         LOGGER.info("Antipatterns");
+
+        List<ExcFlexibleExtractor.ExcFlexibleAntipattern> antipatternList = new ArrayList<>(antipatterns);
+        Collections.sort(antipatternList, new Comparator<ExcFlexibleExtractor.ExcFlexibleAntipattern>() {
+            @Override
+            public int compare(ExcFlexibleExtractor.ExcFlexibleAntipattern o1, ExcFlexibleExtractor.ExcFlexibleAntipattern o2) {
+                return o1.;
+            }
+        });
         for (String antipattern : antipatterns) {
             LOGGER.info("\t" + antipattern);
         }

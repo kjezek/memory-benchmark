@@ -3,7 +3,7 @@ package cz.zcu.kiv.memory.antipatterns;
 /**
  * @author Kamil Jezek [kamil.jezek@verifalabs.com]
  */
-public interface ResultConsumer {
+public interface ResultConsumer<T> {
 
-    void consume(Object result);
+    void consume(T result);
 }

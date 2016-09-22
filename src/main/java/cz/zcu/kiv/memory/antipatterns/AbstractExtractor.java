@@ -14,11 +14,11 @@ import java.util.zip.ZipFile;
 /**
  * @author Kamil Jezek [kamil.jezek@verifalabs.com]
  */
-public abstract class AbstractExtractor implements Extractor {
+public abstract class AbstractExtractor<T> implements Extractor {
 
-    private ResultConsumer consumer;
+    private ResultConsumer<T> consumer;
 
-    public AbstractExtractor(ResultConsumer consumer) {
+    public AbstractExtractor(ResultConsumer<T> consumer) {
         this.consumer = consumer;
     }
 
@@ -45,7 +45,7 @@ public abstract class AbstractExtractor implements Extractor {
 
     public abstract void end();
 
-    public ResultConsumer getConsumer() {
+    public ResultConsumer<T> getConsumer() {
         return consumer;
     }
 }

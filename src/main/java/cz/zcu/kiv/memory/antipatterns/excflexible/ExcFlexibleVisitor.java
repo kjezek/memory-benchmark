@@ -26,15 +26,27 @@ import java.util.Set;
 public class ExcFlexibleVisitor extends VoidVisitorAdapter<Object> {
 
     /**
-     * List of commonly used Java collections.
+     * List of commonly used Java collections, used as field assignment.
      */
-    private static final List<String> COLLECTIONS = Arrays.asList(
-            "Set", "HashSet", "TreeSet", "LinkedHashSet",
+    private static final List<String> COLLECTIONS_IMPL = Arrays.asList(
+            "HashSet", "TreeSet", "LinkedHashSet",
+            "ArrayList", "LinkedList"
+    );
+
+    /**
+     * List of commonly used Java collections, used as field definitions.
+     */
+    private static final List<String> COLLECTIONS_DEF = Arrays.asList(
+            "Set",  // TODO - need to check implementation - may be EnumSet, which is right
+            "HashSet", "TreeSet", "LinkedHashSet",
             "List", "ArrayList", "LinkedList",
             "Collection"
     );
 
+
     private Set<AstField> fields = new HashSet<>();
+    private Set<AstField> enumSetFields = new HashSet<>();
+
 
     /** Revers pointer from parameter types to fields. */
     private Multimap<String, AstField> paramTypes = HashMultimap.create();
@@ -68,8 +80,9 @@ public class ExcFlexibleVisitor extends VoidVisitorAdapter<Object> {
                 if (t.getType() instanceof ClassOrInterfaceType) {
                     ClassOrInterfaceType tt = (ClassOrInterfaceType) t.getType();
 
+                    // extract name of field definition - e.g.  List of  List field = new ArrayList
                     String name = tt.getName();
-                    if (COLLECTIONS.contains(name)) {    // check only collection types  TODO - we may ignore a lot of cases e.g. MyList<>
+                    if (COLLECTIONS_DEF.contains(name)) {    // check only collection types  TODO - we may ignore a lot of cases e.g. MyList<>
                         List<VariableDeclarator> variables = n.getVariables();
                         if (variables.size() > 0) { // TODO what if we have more than one var?
                             VariableDeclarator varDec = variables.get(0);
@@ -89,8 +102,11 @@ public class ExcFlexibleVisitor extends VoidVisitorAdapter<Object> {
                                 for (String argType : args) {
                                     paramTypes.put(argType, field);
                                 }
-                            }
 
+                                if (type.getName().equals("EnumSet")) {
+                                    enumSetFields.add(field);
+                                }
+                            }
                         }
                         if (variables.size() > 1) {
                             System.out.println(variables);
@@ -106,7 +122,13 @@ public class ExcFlexibleVisitor extends VoidVisitorAdapter<Object> {
         return fields;
     }
 
+    public Set<AstField> getEnumSetFields() {
+        return enumSetFields;
+    }
+
     public Multimap<String, AstField> getParamTypes() {
         return paramTypes;
     }
+
+
 }
